@@ -8,7 +8,7 @@
 
 > **Nivel**: Intermedio → Avanzado  
 > **Duración estimada**: 3-4 meses (1-2 horas/día)  
-> **Total de guías**: 28 documentos detallados
+> **Total de guías**: 36 documentos detallados
 
 ## 📖 Descripción
 
@@ -29,9 +29,10 @@ Esta ruta de aprendizaje está diseñada para desarrolladores Flutter que desean
 | **1** | Fundamentos de Linux y Redes | [4](./modulo_1_linux_redes/) |
 | **2** | Docker y Dokploy (Orquestación) | [3](./modulo_2_docker_dokploy/) |
 | **3** | Automatización (n8n + OpenClaw) | [3](./modulo_3_automatizacion/) |
-| **4** | Backend con Serverpod (El Cerebro) | [11](./modulo_4_serverpod/) |
+| **4** | Backend con Serverpod (El Cerebro) | [13](./modulo_4_serverpod/) |
 | **5** | Infraestructura Pro (Supabase + Odoo) | [3](./modulo_5_supabase_odoo/) |
-| **6** | Despliegue en VPS Remoto (Producción) | [4](./modulo_6_vps_produccion/) |
+| **6** | Despliegue en VPS Remoto (Producción) | [6](./modulo_6_vps_produccion/) |
+| **7** | Infraestructura como Código (IaC) | [4](./modulo_7_iac_terraform_ansible/) |
 
 ---
 
@@ -91,6 +92,8 @@ Aquí es donde tu lógica de Flutter se convierte en servidor. Ahora con enfoque
 | [09. Docker y Despliegue](./modulo_4_serverpod/09-DOCKER-Y-DESPLIEGUE.md) | Docker, despliegue a producción, CI/CD |
 | [10. Guía Uso IA Serverpod](./modulo_4_serverpod/10-GUIA-USO-IA-SERVERPOD.md) | Framework AIDR adaptado para Serverpod |
 | [11. Guía Práctica Prompts](./modulo_4_serverpod/11-GUIA-PRACTICA-PROMPTS-SERVERPOD.md) | 18 prompts específicos listos para usar |
+| [12. Arquitectura Microservicios](./modulo_4_serverpod/12-ARQUITECTURA-MICROSERVICIOS.md) | Monolitos vs Microservicios, cuándo separar |
+| [13. Comunicación entre Servicios](./modulo_4_serverpod/13-COMUNICACION-ENTRE-SERVICIOS.md) | gRPC, REST, Colas de mensajes (Redis/RabbitMQ) |
 
 ---
 
@@ -116,6 +119,21 @@ El paso final: llevar todo a internet.
 | [2. Hardening del Servidor](./modulo_6_vps_produccion/2_hardening_servidor.md) | SSH keys, UFW, Fail2Ban, actualizaciones |
 | [3. CI/CD](./modulo_6_vps_produccion/3_cicd.md) | GitHub Actions, webhooks, despliegues automáticos |
 | [4. Monitoreo](./modulo_6_vps_produccion/4_monitoreo.md) | htop, logs, Prometheus/Grafana, alertas |
+| [5. Logs Centralizados](./modulo_6_vps_produccion/5_logs_centralizados.md) | Journald, Promtail, Loki, Grafana (LogQL) |
+| [6. Tracing Distribuido](./modulo_6_vps_produccion/6_tracing_distribuido.md) | OpenTelemetry, Jaeger, spans, context propagation |
+
+---
+
+### 🛠️ Módulo 7: Infraestructura como Código (IaC)
+
+Automatiza la creación y configuración de tu infraestructura. Deja de hacer `ssh` y `apt install` manualmente.
+
+| Guía | Descripción |
+|------|-------------|
+| [1. Introducción a IaC](./modulo_7_iac_terraform_ansible/1_intro_iac.md) | ¿Por qué automatizar? Terraform vs Ansible |
+| [2. Terraform Básico](./modulo_7_iac_terraform_ansible/2_terraform_basico.md) | HCL syntax, Providers, State File, Hetzner |
+| [3. Ansible Configuración](./modulo_7_iac_terraform_ansible/3_ansible_configuracion.md) | Inventario, Playbooks, Roles, SSH |
+| [4. Integración CI/CD](./modulo_7_iac_terraform_ansible/4_integracion_ci_cd.md) | GitHub Actions + Terraform + Ansible (GitOps) |
 
 ---
 
@@ -137,9 +155,10 @@ El paso final: llevar todo a internet.
 | **Semanas 5-6** | ~12 horas | Módulo 3: Automatización |
 | **Semanas 7-10** | ~15 horas | Módulo 4: Serverpod (Clean Architecture) |
 | **Semanas 11-12** | ~12 horas | Módulo 5: Supabase + Odoo |
-| **Semanas 13-16** | ~16 horas | Módulo 6: VPS Producción |
+| **Semanas 13-16** | ~16 horas | Módulo 6: VPS Producción + Observabilidad |
+| **Semanas 17** | ~3 horas | Módulo 7: IaC (Terraform + Ansible) |
 
-> **Total estimado**: ~90 horas (3-4 meses con 1-2 horas/día)
+> **Total estimado**: ~93 horas (4-5 meses con 1-2 horas/día)
 
 ---
 
