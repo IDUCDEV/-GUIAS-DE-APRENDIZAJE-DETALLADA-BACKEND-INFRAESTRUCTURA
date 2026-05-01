@@ -8,7 +8,7 @@
 
 > **Nivel**: Intermedio → Avanzado  
 > **Duración estimada**: 3-4 meses (1-2 horas/día)  
-> **Total de guías**: 21 documentos detallados
+> **Total de guías**: 28 documentos detallados
 
 ## 📖 Descripción
 
@@ -29,7 +29,7 @@ Esta ruta de aprendizaje está diseñada para desarrolladores Flutter que desean
 | **1** | Fundamentos de Linux y Redes | [4](./modulo_1_linux_redes/) |
 | **2** | Docker y Dokploy (Orquestación) | [3](./modulo_2_docker_dokploy/) |
 | **3** | Automatización (n8n + OpenClaw) | [3](./modulo_3_automatizacion/) |
-| **4** | Backend con Serverpod (El Cerebro) | [4](./modulo_4_serverpod/) |
+| **4** | Backend con Serverpod (El Cerebro) | [11](./modulo_4_serverpod/) |
 | **5** | Infraestructura Pro (Supabase + Odoo) | [3](./modulo_5_supabase_odoo/) |
 | **6** | Despliegue en VPS Remoto (Producción) | [4](./modulo_6_vps_produccion/) |
 
@@ -76,14 +76,21 @@ Tu primera herramienta de productividad real.
 
 ### 🟥 Módulo 4: Backend con Serverpod
 
-Aquí es donde tu lógica de Flutter se convierte en servidor.
+Aquí es donde tu lógica de Flutter se convierte en servidor. Ahora con enfoque en Clean Architecture.
 
 | Guía | Descripción |
 |------|-------------|
-| [1. Arquitectura de Servidor](./modulo_4_serverpod/1_arquitectura_servidor.md) | RPC vs REST, generación de código, estructura de proyecto |
-| [2. Modelado de Datos (YAML)](./modulo_4_serverpod/2_modelado_datos_yaml.md) | Modelos, tipos de datos, relaciones, validaciones |
-| [3. Lógica de Endpoints](./modulo_4_serverpod/3_logica_endpoints.md) | Session, CRUD, queries avanzadas, transacciones |
-| [4. Gestión de Sesiones y Auth](./modulo_4_serverpod/4_gestion_sesiones_auth.md) | Registro, login, @protected, roles, scopes |
+| [01. Guía Conceptual Backend para Mobile Devs](./modulo_4_serverpod/01-GUIA-CONCEPTUAL-BACKEND-PARA-MOBILE-DEVS.md) | Conceptos backend: API, base de datos, autenticación desde Flutter |
+| [02. Arquitectura Clean para Serverpod](./modulo_4_serverpod/02-ARQUITECTURA-CLEAN-PARA-SERVERPOD.md) | Adaptación de Clean Architecture: Endpoints=UI, Services=UseCases |
+| [03. Estructura Proyecto Serverpod](./modulo_4_serverpod/03-ESTRUCTURA-PROYECTO-SERVERPOD.md) | Estructura de carpetas y templates de código |
+| [04. Models y Database](./modulo_4_serverpod/04-MODELS-Y-DATABASE.md) | Modelos YAML, ORM de Serverpod, migraciones, serialización |
+| [05. Endpoints y Servicios](./modulo_4_serverpod/05-ENDPOINTS-Y-SERVICIOS.md) | CRUD completo, autenticación Serverpod 3, validaciones, DTOs |
+| [06. DI - Dependency Injection](./modulo_4_serverpod/06-DI-DEPENDENCY-INJECTION.md) | Inyección automática, Service Locator, Scoped Sessions |
+| [07. Testing Backend](./modulo_4_serverpod/07-TESTING-BACKEND.md) | Unit tests, integration tests con `withServerpod`, mocks |
+| [08. Future Calls y Archivos](./modulo_4_serverpod/08-FUTURE-CALLS-Y-ARCHIVOS.md) | Streams, comunicación en tiempo real y manejo de archivos |
+| [09. Docker y Despliegue](./modulo_4_serverpod/09-DOCKER-Y-DESPLIEGUE.md) | Docker, despliegue a producción, CI/CD |
+| [10. Guía Uso IA Serverpod](./modulo_4_serverpod/10-GUIA-USO-IA-SERVERPOD.md) | Framework AIDR adaptado para Serverpod |
+| [11. Guía Práctica Prompts](./modulo_4_serverpod/11-GUIA-PRACTICA-PROMPTS-SERVERPOD.md) | 18 prompts específicos listos para usar |
 
 ---
 
@@ -128,11 +135,11 @@ El paso final: llevar todo a internet.
 | **Semanas 1-2** | ~20 horas | Módulo 1: Linux y Redes |
 | **Semanas 3-4** | ~15 horas | Módulo 2: Docker y Dokploy |
 | **Semanas 5-6** | ~12 horas | Módulo 3: Automatización |
-| **Semanas 7-10** | ~25 horas | Módulo 4: Serverpod |
+| **Semanas 7-10** | ~15 horas | Módulo 4: Serverpod (Clean Architecture) |
 | **Semanas 11-12** | ~12 horas | Módulo 5: Supabase + Odoo |
 | **Semanas 13-16** | ~16 horas | Módulo 6: VPS Producción |
 
-> **Total estimado**: ~100 horas (3-4 meses con 1-2 horas/día)
+> **Total estimado**: ~90 horas (3-4 meses con 1-2 horas/día)
 
 ---
 
