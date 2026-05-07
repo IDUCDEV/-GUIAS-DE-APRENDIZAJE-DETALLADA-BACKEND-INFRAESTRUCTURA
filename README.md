@@ -28,7 +28,7 @@ Esta ruta de aprendizaje está diseñada para desarrolladores Flutter que desean
 |--------|------|:-----:|
 | **1** | Fundamentos de Linux y Redes | [4](./modulo_1_linux_redes/) |
 | **2** | Docker y Dokploy (Orquestación) | [3](./modulo_2_docker_dokploy/) |
-| **3** | Automatización (n8n + OpenClaw) | [3](./modulo_3_automatizacion/) |
+| **3** | Automatización con n8n | [6](./modulo_3_automatizacion/) |
 | **4** | Backend con Serverpod (El Cerebro) | [13](./modulo_4_serverpod/) |
 | **5** | Infraestructura Pro (Supabase + Odoo) | [3](./modulo_5_supabase_odoo/) |
 | **6** | Despliegue en VPS Remoto (Producción) | [6](./modulo_6_vps_produccion/) |
@@ -63,15 +63,18 @@ Aprende a desplegar servicios sin ensuciar tu sistema operativo.
 
 ---
 
-### 🟩 Módulo 3: Automatización (n8n + OpenClaw)
+### 🟩 Módulo 3: Automatización con n8n
 
-Tu primera herramienta de productividad real.
+Tu primera herramienta de productividad real. Ahora 100% nativa con n8n.
 
 | Guía | Descripción |
 |------|-------------|
-| [1. Conceptos de Automatización](./modulo_3_automatizacion/1_conceptos_automatizacion.md) | Workflows, triggers, patrones de diseño |
-| [2. n8n Avanzado](./modulo_3_automatizacion/2_n8n_avanzado.md) | HTTP Request, Set, Code (JS), variables de entorno |
-| [3. Scraping y APIs](./modulo_3_automatizacion/3_scraping_y_apis.md) | OpenClaw, webhooks, integración con Serverpod |
+| [1. n8n desde Cero](./modulo_3_automatizacion/1_n8n_desde_cero.md) | Workflows, triggers, Items y lógica básica |
+| [2. Transformación de Datos](./modulo_3_automatizacion/2_transformacion_de_datos.md) | Edit Fields, Filter, Merge y expresiones JS |
+| [3. Conectividad Total](./modulo_3_automatizacion/3_conectividad_total.md) | HTTP Request, Webhooks y gestión de credenciales |
+| [4. Estructuras Avanzadas](./modulo_3_automatizacion/4_estructuras_avanzadas.md) | Sub-workflows, manejo de errores y datos binarios |
+| [5. Preparación para Producción](./modulo_3_automatizacion/5_preparacion_produccion.md) | VPS, seguridad, pruning y backups con Git |
+| [6. Scraping Nativo con n8n](./modulo_3_automatizacion/6_scraping_nativo_n8n.md) | Extracción de datos web sin herramientas externas |
 
 ---
 
@@ -175,8 +178,7 @@ Automatiza la creación y configuración de tu infraestructura. Deja de hacer `s
 - **Dokploy** - Panel de gestión
 
 ### Automatización
-- **n8n** - Workflow automation
-- **OpenClaw** - Web scraping
+- **n8n** - Workflow automation y Web Scraping nativo
 
 ### Infraestructura
 - **Ubuntu Server** - Sistema operativo

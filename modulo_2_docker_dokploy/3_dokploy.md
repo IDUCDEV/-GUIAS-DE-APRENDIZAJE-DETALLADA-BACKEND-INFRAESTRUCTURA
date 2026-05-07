@@ -544,4 +544,4 @@ En esta guía has aprendido:
 
 **Fin del Módulo 2** - Ahora puedes orquestar servicios con Docker y gestionarlos con Dokploy.
 
-**Siguiente:** Módulo 3: Automatización con n8n + OpenClaw.
+**Siguiente:** Módulo 3: Automatización con n8n.
