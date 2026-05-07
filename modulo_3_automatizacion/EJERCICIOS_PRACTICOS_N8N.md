@@ -143,6 +143,12 @@ Después de completar el laboratorio, deberías tener:
 
 **Reto Pro:** Añade una segunda condición al `If` para que solo pase si el `id` es mayor a 100. (Pista: añade una regla "Number" con "> 100")
 
+#### 📚 Referencias
+
+- [Webhook](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
+- [If](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.if/)
+- [Edit Fields](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.set/)
+
 ---
 
 ### Laboratorio 2: Monitor de Precios (HTTP & HTML Scraping)
@@ -245,6 +251,12 @@ El precio llegará como `$64,500.00` - no puedes hacer cálculos con ese formato
 Al ejecutar el workflow, obtendrás el precio del Bitcoin como un número limpio (sin $ ni comas), listo para guardar en base de datos o usar en una condición.
 
 **Reto Pro:** Añade un nodo `If` que solo te muestre el precio final si es menor de 50,000. Así sabrás cuándo comprar barato.
+
+#### 📚 Referencias
+
+- [HTTP Request](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest/)
+- [HTML Extract](https://docs.n8n.io/nodes/n8n-nodes-base.html/)
+- [Edit Fields](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.set/)
 
 ---
 
@@ -356,6 +368,11 @@ Los usuarios escriben sus datos como les viene en gana: "  jUAN perez  ", "JUAN@
 }
 ```
 
+#### 📚 Referencias
+
+- [Code](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.code/)
+- [Edit Fields](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.set/)
+
 ---
 
 ### Laboratorio 4: El "Vigilante" de Errores (Error Workflows)
@@ -443,6 +460,10 @@ Has creado flujos de automatización. Pero ¿qué pasa cuando un flujo falla? Si
 - El workflow Vigilante queda "escuchando" (no se ejecuta hasta que otro falle)
 - Cuando otro workflow falla, el Vigilante se activa automáticamente
 - Recibes un mensaje con: nombre del workflow, timestamp y mensaje de error
+
+#### 📚 Referencias
+
+- [Error Trigger](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.errortrigger/)
 
 ---
 
@@ -542,6 +563,10 @@ Necesitas consumir una API de frases/noticias en inglés y traducirlas automáti
 
 Obtienes una frase en inglés desde la API de citas, la pasas por el traductor, y recibes la frase traducida al español. Un solo flujo conecta dos servicios.
 
+#### 📚 Referencias
+
+- [HTTP Request](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest/)
+
 ---
 
 ### Laboratorio 6: Sincronizador Supabase → Google Sheets
@@ -623,6 +648,11 @@ Tienes datos de usuarios en Supabase (base de datos PostgreSQL) pero tu equipo a
 #### 🎯 Resultado Esperado
 
 Cada vez que se ejecute el workflow, los datos de Supabase aparecen en Google Sheets. El equipo administrativo ve la info sin tener acceso a la base de datos.
+
+#### 📚 Referencias
+
+- [Supabase](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.supabase/)
+- [Google Sheets](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googleSheets/)
 
 ---
 
@@ -736,6 +766,11 @@ Cuando termina:
 - Puedes ver en los logs cómo va uno por uno
 - Cuando termina, se activa la rama "Done"
 
+#### 📚 Referencias
+
+- [Loop Over Items (Split In Batches)](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.splitinbatches/)
+- [Wait](https://docs.n8n.io/nodes/n8n-nodes-base.wait/)
+
 ---
 
 ### Laboratorio 8: Inspector de Binarios (Seguridad)
@@ -820,6 +855,11 @@ Tu aplicación permite subir archivos (imágenes, PDFs). Pero no puedes confiar 
 - Sabes el tamaño del archivo en bytes
 - Sabes la extensión y el tipo MIME
 - Decides si aceptarlo o rechazarlo según el tamaño
+
+#### 📚 Referencias
+
+- [HTTP Request](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest/)
+- [Extract from File](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.extractfromfile/)
 
 ---
 
@@ -909,6 +949,12 @@ Tienes un consultorio/negocio con clientes que tienen citas. Cada día a las 9 A
 
 **Mensaje que recibe el cliente:**
 > "Hola Juan Pérez, te recordamos que tienes una cita hoy a las 14:00. Por favor confirma tu asistencia respondiendo SÍ."
+
+#### 📚 Referencias
+
+- [Schedule Trigger](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.scheduletrigger/)
+- [Supabase](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.supabase/)
+- [WhatsApp Business Cloud](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.whatsapp/)
 
 ---
 
@@ -1001,6 +1047,12 @@ Bot: "Nuestros planes: Básico $199/mes, Premium $399/mes. ¿Te interesa algún 
 - Responde con la información correspondiente
 - Si no entiende, pasa a un agente humano
 
+#### 📚 Referencias
+
+- [WhatsApp Business Cloud](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.whatsapp/)
+- [Edit Fields](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.set/)
+- [Switch](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.switch/)
+
 ---
 
 ### Laboratorio 11: Envío de Facturas PDF por WhatsApp
@@ -1087,6 +1139,12 @@ Un cliente hace una compra en tu tienda online. Necesitas enviarle automáticame
 #### 🎯 Resultado Esperado
 
 Cuando se activa el flujo, el cliente recibe un WhatsApp con el PDF de su factura adjunto, sin intervención humana.
+
+#### 📚 Referencias
+
+- [Webhook](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
+- [HTTP Request](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest/)
+- [WhatsApp Business Cloud](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.whatsapp/)
 
 ---
 
@@ -1208,6 +1266,12 @@ ADD Maria García, +5215587654321, maria@test.com
 - El flujo parsea automáticamente los datos
 - Los guarda en la base de datos
 - Recibes una confirmación de que se agregó correctamente
+
+#### 📚 Referencias
+
+- [WhatsApp Business Cloud](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.whatsapp/)
+- [Edit Fields](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.set/)
+- [Supabase](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.supabase/)
 
 ---
 
