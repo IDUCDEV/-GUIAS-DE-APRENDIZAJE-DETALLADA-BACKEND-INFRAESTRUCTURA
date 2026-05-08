@@ -83,9 +83,120 @@ n8n hace loops automáticamente, pero a veces necesitas control:
 
 ---
 
+## 7. Stop And Error: Control de Errores Manual
+
+A veces no quieres esperar a que un error ocurra naturalmente. El nodo **Stop And Error** te permite lanzar un error intencionalmente cuando una condición no se cumple.
+
+### ¿Cuándo usarlo?
+- Cuando validas datos y algo está mal (ej: email inválido).
+- Cuando una API externa devuelve un código de error que debes propagar.
+- Cuando quieres detener el flujo con un mensaje claro en los logs.
+
+### Configuración:
+
+| Campo | Valor | Explicación |
+|-------|-------|-------------|
+| `Error Message` | `El campo email es obligatorio` | El mensaje que aparecerá en el error |
+| `Stop Workflow` | `True` | Detiene toda la ejecución |
+
+### Ejemplo: Validación de datos antes de procesar
+
+```plaintext
+[Webhook: nuevo registro]
+       ↓
+[If: {{ $json.email }} is empty]
+       ↓ (True)
+[Stop And Error: "El email es obligatorio"]
+       ↓ (False)
+[Postgres: INSERT INTO usuarios]
+```
+
+### Diferencia con Error Trigger:
+
+| Stop And Error | Error Trigger |
+|----------------|---------------|
+| Se coloca dentro del flujo principal | Es un trigger para un workflow separado |
+| Lanza el error manualmente | Captura errores automáticos |
+| Detiene el flujo inmediatamente | Se ejecuta cuando otro flujo falla |
+
+Puedes combinar ambos: un **Stop And Error** en el flujo principal activará el **Error Trigger** del workflow de errores.
+
+---
+
+## 8. Limit: Controla el Volumen de Datos
+
+El nodo **Limit** hace exactamente lo que su nombre indica: limita la cantidad de items que pasan al siguiente nodo. Es útil cuando:
+- Estás probando un flujo con datos reales y no quieres procesar 10,000 registros.
+- Una API externa tiene un límite de peticiones.
+- Solo necesitas los primeros N resultados.
+
+### Configuración:
+
+| Campo | Valor |
+|-------|-------|
+| `Max Items` | `100` (solo pasarán los primeros 100 items) |
+| `Keep` | `First` o `Last` (los primeros o los últimos) |
+
+### Ejemplo: Procesar solo los 10 pedidos más recientes
+
+```plaintext
+[Postgres: SELECT * FROM pedidos ORDER BY fecha DESC]
+       ↓
+[Limit: Max Items = 10, Keep = First]
+       ↓
+[Procesar solo esos 10 pedidos]
+```
+
+---
+
+## 9. Data Table: Formatea Datos como Tabla
+
+El nodo **Data Table** transforma tus datos en una tabla visual con formato Markdown o HTML. Es perfecto para:
+
+- Enviar reportes por email con tablas bonitas.
+- Mostrar datos en Telegram o Slack con formato limpio.
+- Debuggear visualmente varios items a la vez.
+
+### Configuración:
+
+| Campo | Valor |
+|-------|-------|
+| `Data` | `{{ $json }}` (los items a convertir) |
+| `Format` | `Markdown` o `HTML` |
+| `Options → Fields to Include` | `nombre, email, monto` |
+
+### Ejemplo: Reporte por Telegram
+
+```plaintext
+[Schedule: cada lunes]
+       ↓
+[Postgres: ventas de la semana]
+       ↓
+[Data Table: Format → Markdown, Fields → vendedor, total]
+       ↓
+[Telegram: "📊 Reporte semanal:\n{{ $json.data }}"]
+```
+
+### Output en Markdown:
+
+```markdown
+| Vendedor | Total  |
+|----------|--------|
+| Ana      | $1,200 |
+| Luis     | $950   |
+| Pedro    | $750   |
+```
+
+Output en Telegram/Slack será una tabla perfectamente alineada.
+
+---
+
 ## Ejercicio Práctico del Capítulo
+
 1. Crea un flujo que falle a propósito (usa un nodo **Code** que lance un error: `throw new Error("Fallo de prueba");`).
 2. Crea un **Error Workflow** que te envíe un mensaje a un nodo de log o Telegram cuando este error ocurra.
 3. Asegúrate de que el flujo principal tenga seleccionado el Error Workflow en su configuración.
+4. **Bonus:** Agrega un nodo **Stop And Error** que valide que el dato `nombre` no esté vacío antes de procesar.
+5. **Bonus 2:** Usa **Limit** para procesar solo los primeros 3 items y **Data Table** para mostrarlos en una tabla Markdown.
 
 **Siguiente Guía:** 3.5 Preparación para Producción - VPS, Seguridad y Variables de Entorno.

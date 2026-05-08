@@ -1275,6 +1275,754 @@ ADD Maria García, +5215587654321, maria@test.com
 
 ---
 
+---
+
+## 🟣 NIVEL 4: BACKEND, INFRAESTRUCTURA Y PRODUCCIÓN
+
+### Laboratorio 13: API Gateway con JWT + Postgres
+
+#### 📋 Descripción del Escenario
+
+Tu backend de Flutter necesita un endpoint seguro que solo responda si el cliente presenta un token JWT válido. Vas a construir un "API Gateway" casero con n8n: un webhook que valida el token, consulta la base de datos y responde solo si la autenticación es correcta.
+
+**Concepto:** JWT (JSON Web Token) es como un "carnet digital" que demuestra que un usuario está autenticado. El servidor lo firma con una clave secreta y el cliente lo presenta en cada petición.
+
+#### ✅ Prerequisites
+
+- [ ] n8n funcionando (local o cloud)
+- [ ] Base de datos Postgres o MySQL (puede ser Supabase)
+- [ ] Curl o Postman para probar
+
+#### 📝 Paso a Paso Detallado
+
+**Paso 1: Crear la tabla de usuarios en Postgres**
+
+Ejecuta esta SQL en tu base de datos (o créala desde Supabase):
+```sql
+CREATE TABLE usuarios (
+  id SERIAL PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  nombre TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+INSERT INTO usuarios (email, password_hash, nombre) VALUES
+('juan@test.com', 'abc123hash', 'Juan Pérez'),
+('maria@test.com', 'def456hash', 'Maria García');
+```
+
+**Paso 2: El Trigger (Webhook Login)**
+
+1. Crea un nuevo workflow.
+2. Añade un nodo **Webhook**:
+   | Campo | Valor |
+   |-------|-------|
+   | `HTTP Method` | `POST` |
+   | `Path` | `login` |
+
+3. Haz clic en **Listen for Test Event**.
+
+**Paso 3: Consultar el usuario en Postgres**
+
+1. Conecta un nodo **Postgres** al Webhook.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Execute Query` |
+   | `Query` | `SELECT * FROM usuarios WHERE email = $1` |
+   | `Query Parameters` | `[{{ $json.body.email }}]` |
+
+3. **¿Por qué `$1`?** Porque parametrizar la query previene SQL Injection. Nunca pongas `{{ $json.body.email }}` directamente dentro del SQL.
+
+**Paso 4: Validar que el usuario existe**
+
+1. Conecta un nodo **If** al Postgres.
+2. Condición: `$json` → `Is Not Empty` (si el SELECT devolvió algo, el usuario existe).
+
+**Paso 5: Generar el JWT**
+
+1. En la rama **True** (usuario existe), conecta un nodo **JWT**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Sign` |
+   | `Token Payload` | `{{ { "id": $json.id, "email": $json.email, "nombre": $json.nombre } }}` |
+   | `Secret or Private Key` | `mi-clave-super-secreta-2024` |
+3. En **Options**:
+   | Campo | Valor |
+   |-------|-------|
+   | `Algorithm` | `HS256` |
+   | `Expires In` | `24h` |
+
+**Paso 6: Responder con el token**
+
+1. Conecta un nodo **Respond to Webhook** al JWT.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Respond with` | `JSON` |
+   | `Response Body` | `{ "token": "{{ $json.token }}", "usuario": "{{ $json.nombre }}" }` |
+
+#### 📊 Ejemplo de Datos
+
+**Petición (curl):**
+```bash
+curl -X POST "https://tun8n.com/webhook-test/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "juan@test.com"}'
+```
+
+**Respuesta exitosa:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJqdWFuQHRlc3QuY29tIiwibm9tYnJlIjoiSnVhbiBQZXJleiIsImlhdCI6MTcwNTMyMTIzNCwiZXhwIjoxNzA1NDA3NjM0fQ...",
+  "usuario": "Juan Pérez"
+}
+```
+
+**Respuesta si el usuario no existe:**
+```json
+{
+  "error": "Usuario no encontrado"
+}
+```
+
+#### ⚠️ Errores Comunes
+
+| Error | Causa | Solución |
+|-------|-------|----------|
+| JWT devuelve error "invalid algorithm" | No seleccionaste HS256 en Options | Ve a Options → Algorithm → HS256 |
+| Postgres no encuentra tabla | La tabla está en otro schema | Usa `SELECT * FROM public.usuarios` |
+| El token expira muy rápido | No configuraste Expires In | Pon `24h` o `7d` en Options |
+| `$json.body` está vacío | No activaste Listen for Test Event | Vuelve a hacer clic en el botón antes del curl |
+
+#### 🎯 Resultado Esperado
+
+- Envías un email por POST → recibes un JWT firmado.
+- Envías un email que no existe → recibes error.
+- El token contiene los datos del usuario y expira en 24h.
+- Puedes verificar el token en [jwt.io](https://jwt.io) con la clave `mi-clave-super-secreta-2024`.
+
+**Reto Pro:** Añade una validación de contraseña. En lugar de solo buscar por email, compara `password_hash` con un hash SHA256 del password recibido (usa el nodo **Crypto**).
+
+#### 📚 Referencias
+
+- [Postgres](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.postgres/)
+- [JWT](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.jwt/)
+- [Crypto](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.crypto/)
+
+---
+
+### Laboratorio 14: Backend CRUD de Usuarios (Postgres)
+
+#### 📋 Descripción del Escenario
+
+Necesitas un backend completo para gestionar usuarios: Crear, Leer, Actualizar y Eliminar (CRUD) usando solo n8n como "servidor backend". Tu app Flutter se comunicará con estos endpoints vía HTTP.
+
+#### ✅ Prerequisites
+
+- [ ] Base de datos Postgres con tabla `usuarios` (del lab anterior)
+- [ ] Conocimiento de métodos HTTP (GET, POST, PUT, DELETE)
+
+#### 📝 Paso a Paso Detallado
+
+Vas a crear **4 workflows separados**, uno para cada operación CRUD. Cada uno usará un path de webhook diferente.
+
+**Workflow A: CREATE (POST /usuarios)**
+
+1. Crea un nuevo workflow "Crear Usuario".
+2. **Webhook:** POST, Path: `usuarios`.
+3. **Crypto (Hash):**
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Hash` |
+   | `Fields` | `password` |
+   | `Options → Algorithm` | `sha256` |
+4. **Postgres (Insert):**
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Insert` |
+   | `Table` | `usuarios` |
+   | `Columns` | Mapea: email, password_hash, nombre |
+5. **Respond to Webhook:** JSON con `{ "id": $json.id, "mensaje": "Usuario creado" }`.
+
+**Workflow B: READ (GET /usuarios)**
+
+1. Nuevo workflow "Listar Usuarios".
+2. **Webhook:** GET, Path: `usuarios`.
+3. **Postgres (Select):**
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Select` |
+   | `Table` | `usuarios` |
+   | `Return All` | Activo |
+4. **Respond to Webhook:** JSON con la lista.
+
+**Workflow C: UPDATE (PUT /usuarios)**
+
+1. Nuevo workflow "Actualizar Usuario".
+2. **Webhook:** PUT, Path: `usuarios`.
+3. **Postgres (Update):**
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Update` |
+   | `Table` | `usuarios` |
+   | `Update Key` | `id` (columna para identificar el registro) |
+4. **Respond to Webhook:** Confirmación.
+
+**Workflow D: DELETE (DELETE /usuarios)**
+
+1. Nuevo workflow "Eliminar Usuario".
+2. **Webhook:** DELETE, Path: `usuarios`.
+3. **Postgres (Delete):**
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Delete` |
+   | `Table` | `usuarios` |
+   | `Delete Key` | `id` |
+4. **Respond to Webhook:** Confirmación.
+
+#### 📊 Resumen de Endpoints
+
+| Método | Path | Body/Params | Acción |
+|--------|------|-------------|--------|
+| POST | /usuarios | `{ email, password, nombre }` | Crear usuario |
+| GET | /usuarios | (ninguno) | Listar todos |
+| PUT | /usuarios | `{ id, nombre }` | Actualizar nombre |
+| DELETE | /usuarios | `{ id }` | Eliminar usuario |
+
+#### 🎯 Resultado Esperado
+
+Tienes 4 endpoints HTTP que funcionan como un backend REST real. Tu app Flutter puede hacer peticiones a estos webhooks y gestionar usuarios en la base de datos.
+
+**Reto Pro:** Añade un quinto workflow que sea "GET /usuarios/:id" usando un query parameter. (Pista: usa `$json.body.id` o parámetros de URL).
+
+#### 📚 Referencias
+
+- [Postgres](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.postgres/)
+- [Webhook](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
+- [Crypto](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.crypto/)
+
+---
+
+### Laboratorio 15: Pipeline de Reporting Automatizado (Summarize)
+
+#### 📋 Descripción del Escenario
+
+Cada semana, tu jefe te pide un reporte de ventas: cuánto vendió cada vendedor, cuántas ventas hizo, y el ticket promedio. Hacerlo manual toma 2 horas. Vamos a automatizarlo con Summarize.
+
+#### ✅ Prerequisites
+
+- [ ] Base de datos con una tabla `ventas` (o datos simulados con Code)
+- [ ] Cuenta de email configurada en n8n (Send Email)
+
+#### 📝 Paso a Paso Detallado
+
+**Paso 1: Generar o consultar datos de ventas**
+
+Opción A (datos reales - Postgres):
+1. Añade un nodo **Schedule Trigger** (cada lunes 8 AM).
+2. Conecta **Postgres**: `SELECT * FROM ventas WHERE fecha >= NOW() - INTERVAL '7 days'`.
+
+Opción B (datos simulados - Code):
+```javascript
+return [
+  { vendedor: "Ana", producto: "Laptop", monto: 1200, fecha: "2024-01-01" },
+  { vendedor: "Luis", producto: "Mouse", monto: 25, fecha: "2024-01-02" },
+  { vendedor: "Ana", producto: "Monitor", monto: 300, fecha: "2024-01-03" },
+  { vendedor: "Pedro", producto: "Teclado", monto: 80, fecha: "2024-01-04" },
+  { vendedor: "Luis", producto: "Laptop", monto: 1100, fecha: "2024-01-05" },
+  { vendedor: "Ana", producto: "Mouse", monto: 25, fecha: "2024-01-06" },
+  { vendedor: "Pedro", producto: "Monitor", monto: 350, fecha: "2024-01-07" }
+];
+```
+
+**Paso 2: Agrupar y resumir (Summarize)**
+
+1. Conecta un nodo **Summarize**.
+2. Configura:
+
+**Group By:**
+| Campo | Valor |
+|-------|-------|
+| `Field to Group By` | `vendedor` |
+
+**Values (puedes añadir varios):**
+| Operation | Field | Alias |
+|-----------|-------|-------|
+| `Sum` | `monto` | `total_vendido` |
+| `Count` | `vendedor` | `cantidad_ventas` |
+| `Average` | `monto` | `ticket_promedio` |
+
+**Paso 3: Ordenar por total vendido (Sort)**
+
+1. Conecta un nodo **Sort**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Sort Fields → Field` | `total_vendido` |
+   | `Sort Fields → Order` | `Descending` |
+
+**Paso 4: Formatear como tabla (Data Table)**
+
+1. Conecta un nodo **Data Table**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Format` | `Markdown` |
+   | `Fields to Include` | `vendedor, total_vendido, cantidad_ventas, ticket_promedio` |
+
+**Paso 5: Enviar por email (Send Email)**
+
+1. Conecta un nodo **Send Email**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `To` | `jefe@midominio.com` |
+   | `Subject` | `📊 Reporte semanal de ventas - {{ $now.toFormat('dd/MM') }}` |
+   | `HTML` | `{{ $json.html }}` (si usaste HTML en Data Table) o `{{ $json.data }}` para Markdown |
+
+#### 📊 Ejemplo de Datos
+
+**Salida del Summarize:**
+```json
+[
+  { "vendedor": "Ana", "total_vendido": 1525, "cantidad_ventas": 3, "ticket_promedio": 508.33 },
+  { "vendedor": "Luis", "total_vendido": 1125, "cantidad_ventas": 2, "ticket_promedio": 562.50 },
+  { "vendedor": "Pedro", "total_vendido": 430,  "cantidad_ventas": 2, "ticket_promedio": 215.00 }
+]
+```
+
+**Correo que recibe el jefe:**
+```
+📊 Reporte semanal de ventas - 15/01
+
+| Vendedor | Total   | Ventas | Promedio |
+|----------|---------|--------|----------|
+| Ana      | $1,525  | 3      | $508.33  |
+| Luis     | $1,125  | 2      | $562.50  |
+| Pedro    | $430    | 2      | $215.00  |
+```
+
+#### 🎯 Resultado Esperado
+
+- Cada lunes a las 8 AM recibes un correo con el reporte de ventas.
+- No tienes que hacer nada manualmente.
+- Los datos están agrupados, ordenados y formateados como tabla.
+
+**Reto Pro:** Añade un nodo **Convert to File** para exportar el reporte a CSV y adjuntarlo al correo.
+
+#### 📚 Referencias
+
+- [Summarize](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.summarize/)
+- [Data Table](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.datatable/)
+- [Send Email](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.sendemail/)
+- [Convert to File](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.converttofile/)
+
+---
+
+### Laboratorio 16: Sistema de Backup Automatizado (SSH + Compression + FTP)
+
+#### 📋 Descripción del Escenario
+
+Tienes un servidor en producción y necesitas backups automáticos: cada noche, conectar vía SSH, hacer un dump de la base de datos, comprimirlo y subirlo a un servidor FTP externo. Si algo falla, recibes una alerta.
+
+#### ✅ Prerequisites
+
+- [ ] Servidor SSH al que conectarte (puede ser localhost para pruebas)
+- [ ] Credenciales SSH configuradas en n8n
+- [ ] Servidor FTP o SFTP de respaldo
+- [ ] Noción de comandos básicos de Linux
+
+#### 📝 Paso a Paso Detallado
+
+**Paso 1: Programar la ejecución nocturna**
+
+1. Añade un nodo **Schedule Trigger**:
+   | Campo | Valor |
+   |-------|-------|
+   | `Trigger Times` | `Every Day` |
+   | `At` | `02:00` |
+
+**Paso 2: Ejecutar el backup vía SSH**
+
+1. Conecta un nodo **SSH**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Execute Command` |
+   | `Command` | `pg_dump -U postgres nombre_db > /tmp/backup_db.sql && gzip /tmp/backup_db.sql` |
+
+3. **Explicación:** Este comando:
+   - Hace un dump de la BD `nombre_db` a `/tmp/backup_db.sql`
+   - Comprime el archivo con `gzip`
+   - El resultado es `/tmp/backup_db.sql.gz`
+
+**Paso 3: Verificar que el backup se creó**
+
+1. Conecta un segundo **SSH**:
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Execute Command` |
+   | `Command` | `ls -lh /tmp/backup_db.sql.gz` |
+
+2. El resultado será algo como:
+   ```json
+   { "stdout": "-rw-r--r-- 1 root root 1.2M Jan 15 02:00 /tmp/backup_db.sql.gz" }
+   ```
+
+**Paso 4: Descargar el archivo comprimido**
+
+1. Conecta un nodo **Read/Write Files from Disk**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Read File` |
+   | `File Path` | `/tmp/backup_db.sql.gz` |
+   | `Options → Data Property Name` | `data` |
+
+**Paso 5: Subir a FTP**
+
+1. Conecta un nodo **FTP** (o **SFTP** si tu servidor lo soporta).
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Upload` |
+   | `File Path` | `/backups/backup_{{ $now.toFormat('yyyyMMdd') }}.sql.gz` |
+   | `Upload Data` | Arrastra el binary del paso anterior |
+
+**Paso 6: Notificar éxito**
+
+1. Conecta un nodo **Send Email** (o **Telegram**):
+   | Campo | Valor |
+   |-------|-------|
+   | `To` | `admin@midominio.com` |
+   | `Subject` | `✅ Backup completado - {{ $now.toFormat('dd/MM/yyyy') }}` |
+   | `Text` | `Backup subido exitosamente a FTP. Tamaño: 1.2MB` |
+
+**Paso 7 (Opcional): Manejo de errores**
+
+1. Asigna un **Error Workflow** al flujo principal (revisa el Lab 4).
+2. El Error Workflow enviará una alerta si el backup falla.
+
+#### 📊 Diagrama del Flujo
+
+```
+[Schedule Trigger - 2:00 AM]
+       ↓
+[SSH: pg_dump + gzip]
+       ↓
+[SSH: verificar que el archivo existe]
+       ↓
+[If: existe?] ──False──> [Stop And Error: "Backup falló"]
+       ↓ True
+[Read File: backup_db.sql.gz]
+       ↓
+[FTP: upload a servidor externo]
+       ↓
+[Send Email: notificar éxito]
+```
+
+#### 🎯 Resultado Esperado
+
+- Cada noche a las 2 AM se genera un backup automático.
+- El archivo se comprime (aprox. 90% menos espacio).
+- Se sube a un servidor FTP externo.
+- Recibes un correo de confirmación.
+- Si algo falla, recibes una alerta.
+
+**Reto Pro:** Añade un paso de **SSH** que elimine los backups locales después de subirlos para no llenar el disco: `rm /tmp/backup_db.sql.gz`.
+
+#### 📚 Referencias
+
+- [SSH](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.ssh/)
+- [FTP](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.ftp/)
+- [Compression](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.compression/)
+- [Read/Write Files from Disk](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.readwritefile/)
+
+---
+
+### Laboratorio 17: Formulario de Registro con n8n Form
+
+#### 📋 Descripción del Escenario
+
+Tienes una landing page pero no quieres pagar un servicio externo de formularios. Vas a crear un formulario de registro de usuarios directamente con n8n, que guarde los datos en una base de datos y envíe un email de bienvenida automático.
+
+#### ✅ Prerequisites
+
+- [ ] n8n funcionando (necesitas activar el workflow para generar la URL)
+- [ ] Base de datos (Postgres, Supabase o Sheets)
+- [ ] Credenciales de email configuradas
+
+#### 📝 Paso a Paso Detallado
+
+**Paso 1: Crear el formulario**
+
+1. Añade un nodo **n8n Form Trigger**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Title` | `Registro de Usuario` |
+   | `Description` | `Completa tus datos para registrarte en nuestra plataforma` |
+   | `Button Label` | `Crear cuenta` |
+
+3. Añade los campos del formulario haciendo clic en **Add Form Field**:
+
+   | Field Label | Field Type | Required |
+   |-------------|------------|----------|
+   | `Nombre completo` | `Text` | Sí |
+   | `Email` | `Email` | Sí |
+   | `Teléfono` | `Phone` | No |
+   | `Plan` | `Dropdown` | Sí |
+   | `Acepto términos` | `Checkbox` | Sí |
+
+4. Para el campo **Plan** (Dropdown), añade opciones:
+   | Value | Label |
+   |-------|-------|
+   | `basico` | Básico - $9/mes |
+   | `pro` | Pro - $29/mes |
+   | `enterprise` | Enterprise - $99/mes |
+
+**Paso 2: Obtener la URL del formulario**
+
+1. Activa el workflow (interruptor arriba a la derecha).
+2. Copia la URL que aparece en el nodo **n8n Form Trigger**.
+3. Comparte esta URL con tus usuarios. Se verá algo como: `https://tun8n.com/form/abc123/registro`
+
+**Paso 3: Validar los datos**
+
+1. Conecta un nodo **If** al Form Trigger.
+2. Condiciones (todas deben cumplirse):
+   - `$json.Acepto_términos` → Equal → `true`
+   - `$json.Email` → Is Not Empty
+
+**Paso 4: Guardar en base de datos**
+
+1. Conecta un nodo **Postgres** (o **Supabase**):
+   | Campo | Valor |
+   |-------|-------|
+   | `Operation` | `Insert` |
+   | `Table` | `registros` |
+   | `Columns` | Mapea: nombre, email, telefono, plan |
+
+**Paso 5: Enviar email de bienvenida**
+
+1. Conecta un nodo **Send Email**:
+   | Campo | Valor |
+   |-------|-------|
+   | `To` | `{{ $json.Email }}` |
+   | `Subject` | `Bienvenido a nuestra plataforma` |
+   | `HTML` | `<h1>Hola {{ $json.Nombre_completo }}!</h1><p>Gracias por registrarte en el plan {{ $json.Plan }}.</p>` |
+
+**Paso 6: Redirigir después del envío**
+
+1. En el nodo **n8n Form Trigger**, ve a **Options**:
+   | Campo | Valor |
+   |-------|-------|
+   | `Redirect URL` | `https://tusitio.com/gracias` |
+
+#### 📊 Ejemplo de Datos
+
+**Lo que ve el usuario:**
+```
+┌─────────────────────────────────────┐
+│  Registro de Usuario                │
+│                                     │
+│  Completa tus datos para            │
+│  registrarte en nuestra plataforma  │
+│                                     │
+│  Nombre completo: [______________]  │
+│  Email:          [______________]  │
+│  Teléfono:       [______________]  │
+│  Plan:           [Pro ▼         ]  │
+│                                     │
+│  ☐ Acepto términos y condiciones    │
+│                                     │
+│  [       Crear cuenta       ]       │
+└─────────────────────────────────────┘
+```
+
+**Datos que llegan al flujo:**
+```json
+{
+  "Nombre_completo": "Juan Pérez",
+  "Email": "juan@email.com",
+  "Teléfono": "+5215512345678",
+  "Plan": "pro",
+  "Acepto_términos": true
+}
+```
+
+#### ⚠️ Errores Comunes
+
+| Error | Causa | Solución |
+|-------|-------|----------|
+| El formulario no carga | El workflow no está activado | Activa el interruptor arriba a la derecha |
+| Los campos llegan en inglés | El nombre del campo tiene caracteres especiales | Usa nombres sin acentos: `Nombre_completo` |
+| El email de bienvenida no llega | SMTP no configurado correctamente | Verifica credenciales SMTP en Settings |
+| El checkbox siempre es false | No se marcó como Required | Activa Required en el campo Checkbox |
+
+#### 🎯 Resultado Esperado
+
+- Los usuarios ven un formulario profesional.
+- Completan sus datos y se guardan automáticamente en la BD.
+- Reciben un email de bienvenida personalizado.
+- Son redirigidos a una página de agradecimiento.
+- Tú tienes todos los registros en tu base de datos.
+
+**Reto Pro:** Crea un formulario de 2 pasos. El paso 1: datos personales. El paso 2: selección de plan. Conecta dos nodos **n8n Form** en secuencia.
+
+#### 📚 Referencias
+
+- [n8n Form Trigger](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.formtrigger/)
+- [n8n Form](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.form/)
+- [Send Email](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.sendemail/)
+
+---
+
+### Laboratorio 18: Bot de Soporte vía Email (IMAP + Switch)
+
+#### 📋 Descripción del Escenario
+
+Tus clientes te escriben emails de soporte. Quieres que automáticamente se clasifiquen (ventas, soporte técnico, facturación), se guarde un ticket en la base de datos y se envíe una respuesta automática de confirmación.
+
+#### ✅ Prerequisites
+
+- [ ] Cuenta de email con IMAP habilitado (Gmail, Outlook, etc.)
+- [ ] Credenciales IMAP configuradas en n8n
+- [ ] Base de datos para guardar tickets
+
+#### 📝 Paso a Paso Detallado
+
+**Paso 1: Escuchar correos entrantes**
+
+1. Añade un nodo **Email Trigger (IMAP)**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Mailbox` | `INBOX` |
+   | `Only Unread` | Activo |
+   | `Options → Custom Rules` | Añade regla: Subject CONTAINS `soporte` |
+
+**Paso 2: Normalizar el asunto para clasificar**
+
+1. Conecta un nodo **Edit Fields**.
+2. Añade:
+   | Campo | Valor |
+   |-------|-------|
+   | `Name` | `categoria` |
+   | `Value` | `{{ $json.subject.toLowerCase() }}` |
+
+**Paso 3: Clasificar con Switch**
+
+1. Conecta un nodo **Switch**.
+2. Configura:
+   | Campo | Valor |
+   |-------|-------|
+   | `Data Type to Route` | `String` |
+   | `Value` | `{{ $json.categoria }}` |
+
+3. Añade rutas:
+
+   | Ruta | Condición |
+   |------|-----------|
+   | Ruta 1: Ventas | `Contains → venta` o `Contains → precio` o `Contains → comprar` |
+   | Ruta 2: Soporte Técnico | `Contains → error` o `Contains → bug` o `Contains → falla` |
+   | Ruta 3: Facturación | `Contains → factura` o `Contains → pago` o `Contains → recibo` |
+   | Ruta Default | (ninguna) |
+
+**Paso 4: Guardar ticket en base de datos**
+
+Para cada ruta, conecta un nodo **Postgres** (o **Supabase**):
+```sql
+CREATE TABLE tickets (
+  id SERIAL PRIMARY KEY,
+  cliente TEXT,
+  email TEXT,
+  categoria TEXT,
+  asunto TEXT,
+  mensaje TEXT,
+  estado TEXT DEFAULT 'abierto',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+Configura el Postgres:
+| Campo | Valor |
+|-------|-------|
+| `Operation` | `Insert` |
+| `Table` | `tickets` |
+| `Columns` | Mapea: cliente (fromName), email (from), categoria, asunto (subject), mensaje (body) |
+
+**Paso 5: Enviar respuesta automática**
+
+1. Conecta un nodo **Send Email** al Postgres:
+   | Campo | Valor |
+   |-------|-------|
+   | `To` | `{{ $json.email }}` (la dirección que envió el correo) |
+   | `Subject` | `Re: {{ $json.subject }}` |
+   | `Text` | `Hola, hemos recibido tu consulta de {{ $json.categoria }}. Te responderemos en max. 24h. Tu ticket #{{ $json.id }} está siendo procesado.` |
+
+**Paso 6: Notificar al equipo**
+
+1. Conecta un nodo **Telegram** o **Slack** al Send Email:
+   ```
+   📬 Nuevo ticket de soporte
+   Cliente: {{ $json.cliente }}
+   Categoría: {{ $json.categoria }}
+   Ticket: #{{ $json.id }}
+   ```
+
+#### 📊 Ejemplo de Datos
+
+**Correo recibido:**
+```
+From: cliente@email.com
+Subject: Error al iniciar sesión - Soporte
+Body: Hola, no puedo iniciar sesión en mi cuenta...
+```
+
+**Ticket guardado en BD:**
+```json
+{
+  "cliente": "cliente@email.com",
+  "email": "cliente@email.com",
+  "categoria": "soporte técnico",
+  "asunto": "Error al iniciar sesión - Soporte",
+  "mensaje": "Hola, no puedo iniciar sesión en mi cuenta...",
+  "estado": "abierto"
+}
+```
+
+**Respuesta automática enviada:**
+```
+Subject: Re: Error al iniciar sesión - Soporte
+
+Hola, hemos recibido tu consulta de soporte técnico.
+Te responderemos en max. 24h.
+Tu ticket #42 está siendo procesado.
+```
+
+#### 🎯 Resultado Esperado
+
+- El cliente envía un email.
+- Se clasifica automáticamente (ventas / soporte / facturación).
+- Se guarda como ticket en la base de datos.
+- El cliente recibe una respuesta automática de confirmación.
+- El equipo recibe una notificación en Telegram/Slack.
+
+**Reto Pro:** Añade un nodo **Code** que extraiga el texto del `body` y lo limpie de firmas HTML (todo después de `<div class="signature">`) para guardar solo el mensaje relevante.
+
+#### 📚 Referencias
+
+- [Email Trigger (IMAP)](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.emailimap/)
+- [Switch](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.switch/)
+- [Send Email](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.sendemail/)
+- [Telegram](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.telegram/)
+
+---
+
 ## 🎓 Tarea de Aprendizaje
 
 Implementa ahora mismo el **Laboratorio 1**. Cuando logres que el nodo `Edit Fields` te devuelva el mensaje formateado correctamente después de lanzar el `curl` desde tu terminal, habrás entendido el 50% de cómo funciona n8n. ¡Suerte!
