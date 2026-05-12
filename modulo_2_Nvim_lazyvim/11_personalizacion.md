@@ -259,7 +259,7 @@ return {
 
 ---
 
-## 5. Remover Plugins
+## 5. Eliminar Plugins
 
 ### 5.1 Deshabilitar Plugins
 
@@ -274,10 +274,10 @@ return {
 }
 ```
 
-### 5.2 Remover Features
+### 5.2 Eliminar Features
 
 ```lua
--- Remover features específicas
+-- Eliminar features específicas
 return {
   {
     "neovim/nvim-lspconfig",

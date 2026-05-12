@@ -308,7 +308,7 @@ vim.version().minor
 
 ## 8. No Editar
 
-### Archivos que NO Debes Editar (son sobreescritos)
+### Archivos que NO Debes Editar (son sobrescritos)
 
 - `lazy-lock.json` - Se genera automáticamente
 - Archivos en `lua/lazyvim/` - Parte de LazyVim

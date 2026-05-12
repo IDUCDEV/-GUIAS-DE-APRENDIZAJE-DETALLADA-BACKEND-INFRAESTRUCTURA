@@ -1,12 +1,12 @@
 # 02 - Requisitos Previos
 
-Antes de instalar LazyVim, necesitas verificar y preparar tu sistema. Esta guía covering todos los requisitos necesarios.
+Antes de instalar LazyVim, necesitas verificar y preparar tu sistema. Esta guía cubre todos los requisitos necesarios.
 
 ---
 
 ## Neovim >= 0.11.2
 
-Neovim debe estar compiladd con **LuaJIT**.
+Neovim debe estar compilado con **LuaJIT**.
 
 ### Verificar Versión Instalada
 
@@ -447,7 +447,7 @@ chmod +x verify.sh
 
 ## Siguiente Paso
 
-Una vez verificados los requisitos, proceede al **[módulo de instalación](03_instalacion.md)**.
+Una vez verificados los requisitos, procede al **[módulo de instalación](03_instalacion.md)**.
 
 ---
 

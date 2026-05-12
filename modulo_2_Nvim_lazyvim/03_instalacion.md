@@ -40,7 +40,7 @@ mv ~/.config/nvim.bak ~/.config/nvim
 
 ## 2. Clonar el Starter Template
 
-### clone the LazyVim Starter
+### Clonar el Starter de LazyVim
 
 ```bash
 git clone https://github.com/LazyVim/starter ~/.config/nvim
@@ -58,9 +58,9 @@ ls -la ~/.config/nvim/
 
 ---
 
-## 3. Remover .git
+## 3. Eliminar .git
 
-Después de clonar, remueve la carpeta `.git` para poder crear tu propio repositorio.
+Después de clonar, elimina la carpeta `.git` para poder crear tu propio repositorio.
 
 ```bash
 rm -rf ~/.config/nvim/.git
